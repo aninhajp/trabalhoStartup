@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atividade — Simulador de Startup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F2EC;
+  --surface:#FFFFFF;
+  --surface-2:#FBF6F0;
+  --surface-3:#F9F3EC;
+  --ink:#3A2A24;
+  --muted:#75625A;
+  --line:#E8DACE;
+  --line-strong:#D9C7BA;
+  --primary:#557570;
+  --primary-2:#46605C;
+  --primary-soft:#E5EAE7;
+  --accent:#A2543D;
+  --success:#557570;
+  --success-soft:#E5EAE7;
+  --warning:#B5673F;
+  --warning-soft:#FBEBDD;
+  --danger:#8E3A28;
+  --danger-soft:#F6E1DA;
+  --shadow:0 14px 36px rgba(90,50,30,.08);
+  --shadow-sm:0 6px 20px rgba(90,50,30,.06);
+  --radius:24px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at top right, rgba(206,126,93,.09), transparent 26rem),
+    radial-gradient(circle at top left, rgba(85,117,112,.06), transparent 22rem),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:1180px;margin:0 auto;padding:30px 18px 64px}
+#app{
+  background:var(--surface);
+  border:1px solid rgba(232,218,206,.95);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:clamp(20px,3.6vw,42px);
+}
+*::-webkit-scrollbar{height:10px;width:10px}
+*::-webkit-scrollbar-thumb{background:#D9C7BA;border-radius:999px}
+*::-webkit-scrollbar-track{background:transparent}
+h1,h2,h3{margin:0;line-height:1.08;letter-spacing:-.03em}
+h1{font-size:clamp(36px,6vw,62px);font-weight:800;max-width:720px}
+h2{font-size:clamp(25px,3.6vw,38px);font-weight:780;margin-bottom:6px}
+h3{font-size:22px;font-weight:760}
+p{margin:8px 0}
+.mut{color:var(--muted)}
+.caption{font-size:13px;color:var(--muted)}
+
+.bar{list-style:none;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0;margin:0 0 18px}
+.bar li{min-width:0;display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(249,243,236,.84);border:1px solid transparent;color:#A8968C;transition:.2s ease}
+.bar span{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#E8DACE;color:#6B5850;font-weight:800;font-size:12px;flex:none}
+.bar small{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .done{background:#F9F3EC;color:#5A4640;border-color:#D6DCD8}.bar .done span{background:#D6DCD8;color:#46605C}
+.bar .cur{background:#fff;border-color:#C4D2CE;color:#3A2A24;box-shadow:0 6px 18px rgba(85,117,112,.1)}
+.bar .cur span{background:var(--primary);color:#fff}
+
+.hero{display:grid;grid-template-columns:1.12fr .88fr;gap:20px;align-items:stretch;margin-bottom:18px}
+.heroCard{
+  background:linear-gradient(135deg,#3F5A55 0%,#557570 58%,#6E8F89 100%);
+  color:#fff;border-radius:28px;padding:28px;position:relative;overflow:hidden;min-height:270px;
+}
+.heroCard::before{content:"";position:absolute;inset:auto -10% -40% auto;width:240px;height:240px;border-radius:50%;background:rgba(206,126,93,.35)}
+.heroCard::after{content:"";position:absolute;top:-36px;right:-36px;width:150px;height:150px;border-radius:26px;background:rgba(247,209,186,.18);transform:rotate(24deg)}
+.heroCard p{max-width:540px;color:rgba(255,255,255,.86)}
+.pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);padding:7px 12px;border-radius:999px;font-weight:700;font-size:12px;margin-bottom:14px}
+.heroStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.miniStat{background:var(--surface-2);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;justify-content:space-between}
+.miniStat strong{font-size:28px;line-height:1;font-weight:800}
+.miniStat span{font-size:13px;color:var(--muted)}
+.miniStat b{font-size:15px}
+
+.sectionHead{display:flex;justify-content:space-between;gap:14px;align-items:end;margin:22px 0 12px;flex-wrap:wrap}
+.goal{background:linear-gradient(180deg,#FBF6F0,#F9F3EC);border:1px solid var(--line);border-radius:20px;padding:16px 18px;margin:16px 0 18px}
+.goal b{color:#3A2A24}
+
+.cardRail{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:16px}
+.mediaCard,
+.opt{all:unset;display:flex;flex-direction:column;cursor:pointer;position:relative;border-radius:22px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease}
+.mediaCard:hover,.opt:hover:not([disabled]){transform:translateY(-4px);box-shadow:0 18px 36px rgba(90,50,30,.1);border-color:#C4D2CE}
+.mediaCard:focus-visible,.opt:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid #CE7E5D;outline-offset:3px}
+.mediaCard.sel,.opt.sel{border-color:var(--primary);box-shadow:0 0 0 4px rgba(85,117,112,.08),0 18px 36px rgba(90,50,30,.11)}
+.mediaCard.sel::after,.opt.sel::after{content:"✓";position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:#fff;font-weight:800;box-shadow:0 6px 12px rgba(85,117,112,.25)}
+.mediaCard[disabled],.opt[disabled]{opacity:.46;cursor:not-allowed;transform:none;box-shadow:none}
+.mediaTop{position:relative;aspect-ratio:4/3;background:#E5EAE7;overflow:hidden}
+.mediaTop img{width:100%;height:100%;object-fit:cover;display:block}
+.mediaShade{position:absolute;inset:auto 0 0 0;height:42%;background:linear-gradient(180deg,transparent,rgba(90,50,30,.65))}
+.cardBadge{position:absolute;left:14px;top:14px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#5A4640}
+.mediaBody{padding:16px 16px 18px;display:flex;flex-direction:column;gap:8px}
+.mediaBody b,.opt b{font-size:18px;font-weight:760;color:#3A2A24}
+.mediaBody span,.opt span{font-size:14px;color:var(--muted)}
+.cardMeta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:auto;padding-top:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;background:var(--primary-soft);color:#3B5450;font-size:12px;font-weight:800;padding:7px 10px;border-radius:999px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.optBody{padding:18px;display:flex;flex-direction:column;gap:8px;height:100%}
+.optHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#E5EAE7;color:#46605C;flex:none}
+.ic svg{width:24px;height:24px}
+.cost{font-size:12px;font-weight:800;color:#A2543D;background:#E5EAE7;padding:7px 10px;border-radius:999px}
+.opt.sel .ic{background:linear-gradient(135deg,#E5EAE7,#F7D1BA)}
+.help{font-size:13px;color:var(--muted)}
+
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.btn{all:unset;cursor:pointer;padding:14px 20px;border-radius:16px;font-weight:800;font-size:14px;transition:.2s ease}
+.btn.primary{background:linear-gradient(135deg,#A2543D,#8E4530);color:#fff;box-shadow:0 12px 18px rgba(162,84,61,.25)}
+.btn.primary:hover{filter:brightness(1.03)}
+.btn.ghost{background:#fff;color:#3A2A24;border:1px solid var(--line)}
+.btn.ghost:hover{background:#F9F3EC}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+input[type=text]{width:100%;max-width:320px;padding:14px 15px;border-radius:16px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);font:inherit;box-shadow:inset 0 1px 2px rgba(90,50,30,.03)}
+
+.meter{background:linear-gradient(180deg,#FBF6F0,#F9F3EC);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:12px 0 16px}
+.mtop{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap}
+.mtop b{font-size:28px;line-height:1;font-weight:800}
+.mtrack{height:12px;background:#E8DACE;border-radius:999px;margin-top:10px;overflow:hidden}
+.mfill{height:100%;background:linear-gradient(90deg,#CE7E5D,#A2543D);border-radius:999px;transition:width .3s ease}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:18px 0}
+.stat{border:1px solid var(--line);border-radius:20px;padding:16px;background:#fff}
+.stat small{display:block;color:var(--muted);font-size:12px;margin-bottom:10px}
+.stat strong{font-size:30px;line-height:1;font-weight:800;color:#3A2A24}
+.stat .sub{font-size:12px;color:var(--muted);margin-top:8px}
+
+.panel{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#FFFFFF,#FBF6F0);padding:18px;margin-top:16px}
+.reportGrid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;align-items:start}
+.pre{
+  background:#3A2A24;color:#E8DACE;border-radius:20px;padding:16px 18px;font-size:14px;overflow:auto;line-height:1.7;margin:0;
+}
+.track{height:16px;background:#E8DACE;border-radius:999px;overflow:hidden;margin:10px 0 8px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#557570,#6E8F89);border-radius:999px;transition:width .8s ease}
+.verdict{display:flex;gap:14px;align-items:flex-start;border-radius:22px;padding:18px;margin:16px 0 0}
+.verdict.ok{background:var(--success-soft);border:1px solid #B9CBC6}
+.verdict.warn{background:var(--warning-soft);border:1px solid #F0C3A6}
+.verdict.bad{background:var(--danger-soft);border:1px solid #E2B3A6}
+.vi{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;flex:none;color:#fff}
+.ok .vi{background:var(--success)}.warn .vi{background:var(--warning)}.bad .vi{background:var(--danger)}
+.vi svg{width:28px;height:28px}
+.ok h3{color:var(--success)}.warn h3{color:var(--warning)}.bad h3{color:var(--danger)}
+
+.whyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+.whyCard{border-radius:20px;padding:18px;border:1px solid var(--line);background:#fff}
+.whyCard.good{background:linear-gradient(180deg,#FFFFFF,#F3F7F5)}
+.whyCard.bad{background:linear-gradient(180deg,#FFFFFF,#FBF1EC)}
+.whyCard h4{margin:0 0 10px;font-size:16px;letter-spacing:-.02em}
+.whyCard ul{margin:0;padding-left:18px;color:#5A4640}
+.whyCard li+li{margin-top:8px}
+.kicker{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800;margin-bottom:10px}
+.good .kicker{background:#E5EAE7;color:#3B5450}.bad .kicker{background:#F6E1DA;color:#8E3A28}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line)}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:#75625A;background:#F9F3EC}
+.wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
+
+.note{font-size:14px;color:var(--muted);margin-top:10px}
+
+@media (max-width:980px){
+  .hero,.reportGrid,.whyGrid{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .bar{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  main{padding:18px 12px 42px}
+  #app{padding:18px}
+  .heroCard{padding:22px;min-height:auto}
+  .heroStats{grid-template-columns:1fr 1fr}
+  .cardRail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+  .cardRail > *{min-width:238px;scroll-snap-align:start}
+  .bar{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}.mediaCard,.opt,.mfill,.fill,.btn{transition:none}}
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.mediaShade{display:none}
+.art{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;color:#fff;background:#557570}
+.art::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;left:-36px;bottom:-60px;background:rgba(247,209,186,.28)}
+.art::after{content:"";position:absolute;width:96px;height:96px;border-radius:26px;right:-16px;top:-20px;transform:rotate(22deg);background:rgba(255,255,255,.16)}
+.artIc{position:relative;z-index:1;width:104px;height:104px;border-radius:30px;background:rgba(255,255,255,.2);display:grid;place-items:center}
+.artIc svg{width:56px;height:56px}
+.a1{background:#A2543D}.a2{background:#CE7E5D}.a3{background:#D39A89;color:#4A2418}.a4{background:#D6DCD8;color:#46605C}
+.heroCard .hart{position:absolute;right:26px;bottom:22px;width:170px}
+@media (min-width:981px) and (max-width:1120px){.heroCard .hart{display:none}}
+@media (max-width:640px){.heroCard .hart{display:none}}
+.miniStat:nth-child(1){background:#E5EAE7}.miniStat:nth-child(2){background:#FBE3D3}.miniStat:nth-child(3){background:#F1D5CB}.miniStat:nth-child(4){background:#EFE9E1}
+.stat:nth-child(3n+1){background:#E5EAE7}.stat:nth-child(3n+2){background:#FBE3D3}.stat:nth-child(3n+3){background:#F1D5CB}
+.diag{display:flex;gap:14px;align-items:flex-start;background:#FBEBDD;border:1px solid #F0C3A6;border-radius:22px;padding:18px;margin-top:16px}
+.diag .vi{background:#A2543D}.diag h3{color:#8E3A28}
+.decGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.decCard{border:1px solid var(--line);border-radius:20px;padding:18px;background:#fff}
+.decCard small{color:#A2543D;font-weight:800;font-size:12px}
+.decCard h4{margin:6px 0 8px;font-size:17px;letter-spacing:-.02em}
+.decCard p{margin:0;font-size:14px;line-height:1.6;color:#5A4640}
+.youTag{display:inline-block;margin-left:6px;background:#A2543D;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+tr.cur td{background:rgba(247,209,186,.45);font-weight:700}
+.bestBox{background:#E5EAE7;border:1px solid #C4D2CE;border-radius:22px;padding:18px;margin-top:22px}
+.bestBox p{margin:8px 0 0}
+</style>
+</head>
+<body>
+<main>
+  <ol class="bar" id="bar" aria-label="Etapas"></ol>
+  <div id="app"></div>
+</main>
+<script>
+const STARTUPS=[
+  {id:'book',name:'App de estudos',cat:'EdTech',desc:'Ajuda universitários a organizar rotina, tarefas e revisões.'},
+  {id:'play',name:'Plataforma de streaming',cat:'Media',desc:'Serviço de áudio e vídeo com plano gratuito e assinatura mensal.'},
+  {id:'box',name:'Delivery',cat:'FoodTech',desc:'App de entregas rápidas com foco em experiência e conveniência.'},
+  {id:'bag',name:'Loja online',cat:'E-commerce',desc:'Marketplace digital para vender produtos com recorrência.'},
+  {id:'dumb',name:'Aplicativo fitness',cat:'Health',desc:'Treinos, metas e acompanhamento de desempenho no celular.'}
+];
+const CH=[
+  {id:'ig',i:'mega',n:'Instagram Ads',c:700,g:40,d:'Impulsiona alcance rápido com mídia paga em redes sociais.'},
+  {id:'ind',i:'people',n:'Indicação de amigos',c:200,g:25,d:'Programa simples de indicação com menor custo por aquisição.'},
+  {id:'inf',i:'star',n:'Influenciadores',c:500,g:35,d:'Gera autoridade e awareness usando criadores de conteúdo.'},
+  {id:'org',i:'pen',n:'Conteúdo orgânico',c:100,g:15,d:'Aquisição gradual com SEO, posts e conteúdo educativo.'}
+];
+const RET=[
+  {id:'fid',i:'gift',n:'Programa de fidelidade',d:'Pontos, bônus e vantagens para quem continua ativo.',churn:15},
+  {id:'ux',i:'spark',n:'Melhorar a experiência do usuário',d:'Menos atrito, menos bugs e fluxo mais fácil.',churn:12},
+  {id:'not',i:'bell',n:'Notificações personalizadas',d:'Lembretes e gatilhos de retorno no momento certo.',churn:18},
+  {id:'nada',i:'ban',n:'Não fazer nada',d:'Mantém o produto igual e aceita mais risco de abandono.',churn:40}
+];
+const ENG=[
+  {id:'rec',i:'loop',n:'Recorrente',d:'Assinaturas e fidelização para receita contínua.',c:300,g:20,dc:-5,arpu:12,t:'+20 clientes · churn −5 pts · receita recorrente maior'},
+  {id:'vir',i:'share',n:'Viral',d:'Sistema de indicação: cada grupo de usuários atrai novos usuários.',c:100,g:35,dc:0,arpu:10,t:'+35 clientes · CAC baixo · efeito de rede'},
+  {id:'pag',i:'coin',n:'Pago',d:'Escala rápida via anúncios, desde que CAC se mantenha saudável.',c:800,g:50,dc:0,arpu:10,t:'+50 clientes · acelera aquisição · maior investimento'}
+];
+const BUDGET=2000,START=100,GOAL=200;
+const ICONS={
+book:'<path d="M4 4.5A2 2 0 0 1 6 3h14v16H6a2 2 0 0 0-2 2z"/><path d="M4 21h16M9 8h7"/>',
+play:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/>',
+box:'<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+dumb:'<path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/>',
+mega:'<path d="M3 10v4h3l7 4V6L6 10z"/><path d="M17 9a4 4 0 0 1 0 6"/>',
+people:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a5 5 0 0 1 4 6"/>',
+star:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+pen:'<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>',
+gift:'<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M5 13v7h14v-7M12 9v11"/><path d="M12 9C9 9 8 7.5 8 6.5a2 2 0 0 1 4 0zM12 9c3 0 4-1.5 4-2.5a2 2 0 0 0-4 0z"/>',
+spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+loop:'<path d="M20 12a8 8 0 0 0-14-5.3L4 9"/><path d="M4 4v5h5"/><path d="M4 12a8 8 0 0 0 14 5.3L20 15"/><path d="M20 20v-5h-5"/>',
+share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9.2A3 3 0 0 0 12 8c-1.7 0-2.8.8-2.8 2s1.2 1.7 2.8 2 2.8.8 2.8 2-1.1 2-2.8 2a3 3 0 0 1-2.5-1.2M12 6.5V8m0 8v1.5"/>',
+trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4"/>',
+alert:'<path d="M12 4 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.5"/>',
+down:'<path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/>'
+};
+const ic=(k,raw)=>{const v=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;return raw?v:`<span class="ic">${v}</span>`};
+let step=0,S={st:0,group:"",ch:[],ret:null,eng:null};
+const $=id=>document.getElementById(id);
+const brl=v=>"R$ "+v.toLocaleString("pt-BR");
+
+function spentCh(){return CH.filter(c=>S.ch.includes(c.id)).reduce((a,c)=>a+c.c,0)}
+function left(){return BUDGET-spentCh()}
+function calc(ov){
+  ov=ov||{};
+  const r=RET.find(x=>x.id===(ov.ret||S.ret)),e=ENG.find(x=>x.id===(ov.eng||S.eng));
+  const ids=ov.ch||S.ch,chs=CH.filter(c=>ids.includes(c.id));
+  const spent=chs.reduce((a,c)=>a+c.c,0)+e.c, gained=chs.reduce((a,c)=>a+c.g,0)+e.g;
+  const churn=Math.max(5,r.churn+e.dc);
+  const base=START+gained, lost=Math.round(base*churn/100), final=base-lost;
+  const cac=Math.round(spent/Math.max(gained,1)), ltv=Math.round(e.arpu/(churn/100)), ratio=ltv/Math.max(cac,1);
+  let v='warn';
+  if(ratio<1.5||churn>=35)v='bad'; else if(ratio>=3&&churn<=20)v='ok';
+  return {r,e,chs,spent,gained,churn,lost,final,cac,ltv,ratio,v,growth:Math.round((final-START)/START*100),ret:100-churn};
+}
+const VT={
+  ok:["Crescimento sustentável ✓","O negócio cresceu com retenção saudável e retorno suficiente para sustentar novas rodadas de aquisição."],
+  warn:["Crescimento em atenção","O crescimento existe, mas ainda depende de ajustes para ficar realmente sustentável no longo prazo."],
+  bad:["Crescimento insustentável ✗","A startup até pode ter crescido em volume, mas está perdendo valor por churn alto ou retorno baixo sobre aquisição."]
+};
+
+function why(c){
+  const good=[], bad=[];
+  if(S.ch.includes('ind')) good.push('A indicação ajudou a reduzir o custo de aquisição, melhorando o CAC.');
+  if(S.ch.includes('org')) good.push('Conteúdo orgânico fortaleceu um crescimento mais barato e gradual.');
+  if(S.ch.includes('ig')||S.ch.includes('inf')) bad.push('Os canais pagos aumentaram o alcance, mas também puxaram o investimento para cima.');
+  if(c.r.id==='ux') good.push('Melhorar a experiência do usuário ajudou a diminuir o churn e aumentar a retenção.');
+  if(c.r.id==='fid') good.push('O programa de fidelidade aumentou o incentivo para o cliente continuar ativo.');
+  if(c.r.id==='not') good.push('As notificações personalizadas ajudaram a trazer usuários de volta ao produto.');
+  if(c.r.id==='nada') bad.push('Não agir na retenção fez muitos usuários abandonarem o produto, elevando o churn.');
+  if(c.e.id==='rec') good.push('O motor recorrente aumentou a previsibilidade de receita e favoreceu o LTV.');
+  if(c.e.id==='vir') good.push('O motor viral criou aquisição adicional com custo menor, o que favorece a sustentabilidade.');
+  if(c.e.id==='pag') bad.push('O motor pago acelera a escala, mas exige muito cuidado para o CAC não ficar alto demais.');
+  if(c.ratio>=3) good.push(`O LTV (${brl(c.ltv)}) ficou bem acima do CAC (${brl(c.cac)}), então cada cliente tende a devolver mais valor do que custa para ser adquirido.`);
+  else if(c.ratio<1.5) bad.push(`O LTV (${brl(c.ltv)}) ficou muito próximo ou abaixo do CAC (${brl(c.cac)}), sinal de retorno fraco sobre aquisição.`);
+  else bad.push(`A diferença entre LTV (${brl(c.ltv)}) e CAC (${brl(c.cac)}) ficou curta, o que reduz a margem de sustentabilidade.`);
+  if(c.churn<=20) good.push(`O churn de ${c.churn}% ficou em uma faixa mais controlada, preservando a base conquistada.`);
+  else if(c.churn>=35) bad.push(`O churn de ${c.churn}% está alto e obriga a startup a repor clientes o tempo todo só para continuar no mesmo lugar.`);
+  else bad.push(`O churn de ${c.churn}% ainda merece atenção porque parte relevante dos clientes adquiridos acabou saindo.`);
+  if(c.final>=GOAL) good.push(`A meta de ${GOAL} clientes foi atingida, o que mostra tração no curto prazo.`);
+  else bad.push(`A meta de ${GOAL} clientes não foi atingida, indicando que a combinação de aquisição + retenção ainda não entregou tração suficiente.`);
+  if(c.v==='ok' && bad.length<2) bad.push('Mesmo com bom resultado, a sustentabilidade depende de continuar acompanhando CAC, retenção e churn a cada ciclo.');
+  if(c.v==='bad' && good.length<2) good.push('Ainda assim, a simulação mostra quais decisões podem ser aproveitadas e refinadas em uma próxima rodada.');
+  return {good:[...new Set(good)].slice(0,5),bad:[...new Set(bad)].slice(0,5)};
+}
+
+function bar(){ $('bar').innerHTML=["Startup","Aquisição","Retenção","Motor","Resultado"].map((l,i)=>`<li class="${i<step?'done':i===step?'cur':''}"><span>${i<step?'✓':i+1}</span><small>${l}</small></li>`).join('') }
+function go(n){step=n;render();window.scrollTo({top:0,behavior:'smooth'})}
+function pick(k,v){S[k]=v;render()}
+function tog(id){const i=S.ch.indexOf(id);i>=0?S.ch.splice(i,1):S.ch.push(id);render()}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+
+const VL={ok:'Sustentável ✓',warn:'Atenção',bad:'Insustentável ✗'};
+const HERO=`<svg class="hart" viewBox="0 0 200 120" aria-hidden="true"><rect x="16" y="82" width="28" height="30" rx="5" fill="#F7D1BA"/><rect x="56" y="62" width="28" height="50" rx="5" fill="#D39A89"/><rect x="96" y="40" width="28" height="72" rx="5" fill="#CE7E5D"/><rect x="136" y="14" width="28" height="98" rx="5" fill="#A2543D"/><path d="M12 64 70 42l34 10 60-36M152 14h15v15" fill="none" stroke="#F7F2EC" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const life=x=>(100/x).toFixed(1).replace('.',',');
+function best(){let b=null;const rk={ok:2,warn:1,bad:0};
+ for(let m=0;m<16;m++){const ids=CH.filter((_,i)=>m>>i&1).map(c=>c.id);
+  for(const r of RET)for(const e of ENG){
+   if(CH.filter(c=>ids.includes(c.id)).reduce((a,c)=>a+c.c,0)+e.c>BUDGET)continue;
+   const a=calc({ch:ids,ret:r.id,eng:e.id});a.ids=ids;
+   if(!b||rk[a.v]>rk[b.v]||(rk[a.v]===rk[b.v]&&a.final>b.final))b=a;}}
+ return b}
+function diag(c){
+ if(c.churn>=35)return['A causa principal foi a retenção',`Com churn de ${c.churn}%, a startup perdeu ${c.lost} clientes e cada cliente ficou só ~${life(c.churn)} meses. Aquisição não compensa um furo tão grande no balde: quanto mais você compra cliente, mais dinheiro entra e sai.`];
+ if(c.ratio<3&&c.churn>20)return['A retenção ainda está segurando o LTV',`Com churn de ${c.churn}%, o cliente rende só ${brl(c.ltv)} contra um CAC de ${brl(c.cac)}. Melhorar a retenção é o caminho mais barato para aumentar essa margem.`];
+ if(c.ratio<3)return['O CAC ficou alto para o LTV',`Você pagou ${brl(c.cac)} por cliente e cada um devolve ${brl(c.ltv)}. A margem é curta: trocar canais caros por indicação, orgânico ou viral ajudaria.`];
+ if(c.final<GOAL)return['Faltou volume de aquisição',`A retenção e o custo estão saudáveis, mas você terminou com ${c.final} clientes. Sobrou espaço para investir em mais canais sem estragar o CAC.`];
+ return['As decisões ficaram equilibradas',`Você atingiu a meta com churn de ${c.churn}% e LTV ${c.ratio.toFixed(1)}× maior que o CAC: trouxe clientes a um custo razoável e conseguiu mantê-los.`]}
+function altTable(k){
+ const list=k==='ret'?RET:ENG.filter(e=>e.c<=left());
+ return `<div class="wrap"><table><tr><th>${k==='ret'?'Retenção':'Motor'}</th><th>Churn</th><th>Clientes finais</th><th>CAC</th><th>LTV</th><th>Resultado</th></tr>${list.map(o=>{
+  const a=calc(k==='ret'?{ret:o.id}:{eng:o.id}),cur=(k==='ret'?S.ret:S.eng)===o.id;
+  return `<tr class="${cur?'cur':''}"><td>${o.n}${cur?'<span class="youTag">sua escolha</span>':''}</td><td>${a.churn}%</td><td>${a.final}</td><td>${brl(a.cac)}</td><td>${brl(a.ltv)}</td><td>${VL[a.v]}</td></tr>`}).join('')}</table></div>`}
+function analysis(c){
+ const d=diag(c),bs=best(),base=START+c.gained;
+ const bt=RET.map(r=>calc({ret:r.id})).sort((a,b)=>b.final-a.final)[0];
+ const ch=[...c.chs].sort((a,b)=>a.c/a.g-b.c/b.g),n=ch.length,per=x=>brl(Math.round(x.c/x.g));
+ const acq=n?`Você investiu ${brl(spentCh())} em ${ch.map(x=>x.n).join(', ')} e trouxe +${c.gained-c.e.g} clientes. O canal mais eficiente foi ${ch[0].n} (${per(ch[0])} por cliente)${n>1?` e o mais caro foi ${ch[n-1].n} (${per(ch[n-1])} por cliente)`:''}. Canal caro só compensa se o cliente ficar tempo suficiente para devolver o investimento.`:'Você não investiu em nenhum canal, então todo o crescimento veio do motor escolhido.';
+ const ret=`Você escolheu "${c.r.n}" (churn de ${c.r.churn}%${c.e.dc?`, ${c.churn}% com o motor recorrente`:''}). Com isso, ${c.lost} dos ${base} clientes saíram (${Math.round(c.lost/base*100)}%). Cada cliente fica em média ${life(c.churn)} meses e paga ${brl(c.e.arpu)} por mês, então o LTV é ${brl(c.ltv)}.`+(bt.r.id!==c.r.id&&bt.final>c.final?` Com "${bt.r.n}" você terminaria com ${bt.final} clientes (+${bt.final-c.final}) e LTV de ${brl(bt.ltv)}.`:' Foi a melhor opção de retenção para essa combinação.');
+ const EX={rec:'É o único motor que reduz o churn e aumenta a receita por cliente, então eleva o LTV mesmo trazendo poucos clientes novos.',vir:'É o mais barato por cliente e cresce por indicação, mas só funciona bem se o produto for compartilhável e a retenção segurar quem entra.',pag:'É o que mais acelera a escala, porém o mais caro por cliente. Com churn alto o dinheiro não volta e o CAC passa do que o LTV consegue pagar.'};
+ const eng=`O motor ${c.e.n} custou ${brl(c.e.c)} e trouxe +${c.e.g} clientes (${brl(Math.round(c.e.c/c.e.g))} por cliente)${c.e.dc?' e ainda reduziu o churn em 5 pontos':''}. ${EX[c.e.id]}`;
+ return `
+<div class="sectionHead" style="margin-top:30px"><div><h2>Por que deu esse resultado?</h2><p class="mut">Cada decisão mexeu em um número do relatório. Veja o que causou o quê.</p></div></div>
+<div class="diag"><div class="vi">${ic('alert',1)}</div><div><h3>${d[0]}</h3><p>${d[1]}</p></div></div>
+<div class="decGrid">
+<article class="decCard"><small>1 · Aquisição</small><h4>Quantos clientes entraram e a que custo</h4><p>${acq}</p></article>
+<article class="decCard"><small>2 · Retenção</small><h4>Quantos ficaram e quanto valem</h4><p>${ret}</p></article>
+<article class="decCard"><small>3 · Motor de crescimento</small><h4>O que sustenta o crescimento</h4><p>${eng}</p></article>
+</div>
+<div class="sectionHead"><div><h3>E se você tivesse escolhido outra retenção?</h3><p class="mut">Mesmos canais e mesmo motor, mudando só a retenção.</p></div></div>${altTable('ret')}
+<div class="sectionHead"><div><h3>E se tivesse escolhido outro motor?</h3><p class="mut">Mesmos canais e mesma retenção, só com os motores que cabiam no orçamento.</p></div></div>${altTable('eng')}
+<div class="bestBox"><h3>Combinação mais forte para este orçamento</h3><p>Canais: ${CH.filter(x=>bs.ids.includes(x.id)).map(x=>x.n).join(', ')||'nenhum'} · Retenção: ${bs.r.n} · Motor: ${bs.e.n}. Resultado: ${bs.final} clientes, churn de ${bs.churn}% e LTV ${bs.ratio.toFixed(1)}× o CAC (${VL[bs.v]}).</p><p class="mut">É uma referência do teto possível nas regras deste simulador. Compare com a sua e veja qual decisão mais afastou vocês dele.</p></div>
+<div class="panel"><h3>Como o resultado foi calculado</h3><pre class="pre" style="margin-top:12px">Base = ${START} iniciais + ${c.gained} adquiridos = ${base}
+Perdidos = ${base} × ${c.churn}% = ${c.lost}
+Clientes finais = ${base} − ${c.lost} = ${c.final}
+CAC = ${brl(c.spent)} ÷ ${c.gained} clientes = ${brl(c.cac)}
+LTV = ${brl(c.e.arpu)} por mês ÷ ${c.churn}% de churn = ${brl(c.ltv)}
+LTV ÷ CAC = ${c.ratio.toFixed(1)}</pre></div>`}
+
+const V=[
+()=>{ const s=STARTUPS[S.st]; return `
+<div class="hero">
+  <section class="heroCard">
+    <span class="pill">Simulador interativo · Startup Enxuta</span>
+    <h1>Atividade em Sala</h1>
+    <p>Monte uma estratégia de crescimento para a sua startup, escolha canais de aquisição, reduza churn, defina o motor de crescimento e veja se a operação realmente fica sustentável.</p>
+    <div class="row"><button class="btn primary" onclick="go(1)">Começar simulação</button></div>
+  ${HERO}
+  </section>
+  <aside class="heroStats">
+    <div class="miniStat"><span>Clientes iniciais</span><strong>${START}</strong><b>base ativa</b></div>
+    <div class="miniStat"><span>Orçamento</span><strong>${brl(BUDGET)}</strong><b>para investir</b></div>
+    <div class="miniStat"><span>Meta</span><strong>${GOAL}</strong><b>clientes finais</b></div>
+    <div class="miniStat"><span>Critério</span><strong>LTV &gt; CAC</strong><b>+ churn controlado</b></div>
+  </aside>
+</div>
+
+<div class="sectionHead">
+  <div>
+    <h2>Escolha a startup</h2>
+    <p class="mut">Cada startup tem um perfil diferente, mas as decisões das próximas etapas valem para qualquer uma.</p>
+  </div>
+</div>
+<div class="cardRail">${STARTUPS.map((x,i)=>`
+  <button class="mediaCard ${S.st===i?'sel':''}" onclick="pick('st',${i})">
+    <div class="mediaTop">
+      <div class="art a${i}"><span class="artIc">${ic(x.id,1)}</span></div>
+      <div class="mediaShade"></div>
+      <span class="cardBadge">${x.cat}</span>
+    </div>
+    <div class="mediaBody">
+      <b>${x.name}</b>
+      <span>${x.desc}</span>
+      <div class="cardMeta">
+        <span class="tag">${ic(x.id,1)} Startup</span>
+        <span class="caption">Selecionar</span>
+      </div>
+    </div>
+  </button>`).join('')}</div>
+<p style="margin-top:16px"><label for="g"><b>Nome do grupo</b></label></p>
+<input type="text" id="g" placeholder="Ex.: Grupo 1" value="${esc(S.group)}" oninput="S.group=this.value">
+<div class="goal">Sua startup atual é <b>${s.name}</b>. Você começa com <b>${START} clientes</b> e <b>${brl(BUDGET)}</b> de orçamento. O objetivo é chegar a <b>${GOAL} clientes</b> sem destruir a retenção e a sustentabilidade do negócio.</div>
+<div class="row"><button class="btn primary" onclick="go(1)">Ir para aquisição</button></div>`; },
+
+()=>`
+<div class="sectionHead"><div><h2>1. Aquisição</h2><p class="mut">Escolha os canais que vão atrair os primeiros clientes. Você pode combinar estratégias enquanto o orçamento permitir.</p></div></div>
+<div class="meter"><div class="mtop"><div><span class="caption">Orçamento restante</span><br><b>${brl(left())}</b></div><div class="caption">Investido em aquisição: ${brl(spentCh())}</div></div><div class="mtrack"><div class="mfill" style="width:${left()/BUDGET*100}%"></div></div></div>
+<div class="grid">${CH.map(c=>{ const on=S.ch.includes(c.id); return `<button class="opt ${on?'sel':''}" ${!on&&c.c>left()?'disabled':''} onclick="tog('${c.id}')"><div class="optBody"><div class="optHead">${ic(c.i)}<span class="cost">${brl(c.c)}</span></div><b>${c.n}</b><span>${c.d}</span><div class="cardMeta"><span class="tag">+${c.g} clientes</span><span class="help">${on?'Selecionado':'Clique para escolher'}</span></div></div></button>`}).join('')}</div>
+<div class="row"><button class="btn ghost" onclick="go(0)">Voltar</button><button class="btn primary" onclick="go(2)">Continuar</button></div>`,
+
+()=>`
+<div class="sectionHead"><div><h2>2. Retenção</h2><p class="mut">Depois de adquirir clientes, você precisa fazer essas pessoas continuarem usando o produto.</p></div></div>
+<div class="grid">${RET.map(r=>`<button class="opt ${S.ret===r.id?'sel':''}" onclick="pick('ret','${r.id}')"><div class="optBody"><div class="optHead">${ic(r.i)}<span class="cost">Churn ${r.churn}%</span></div><b>${r.n}</b><span>${r.d}</span><div class="cardMeta"><span class="tag">Retenção ${(100-r.churn)}%</span><span class="help">Impacto mensal estimado</span></div></div></button>`).join('')}</div>
+<div class="row"><button class="btn ghost" onclick="go(1)">Voltar</button><button class="btn primary" ${S.ret?'':'disabled'} onclick="go(3)">Continuar</button></div>`,
+
+()=>`
+<div class="sectionHead"><div><h2>3. Motor de crescimento</h2><p class="mut">Defina qual motor vai sustentar a startup depois da tração inicial. Restam ${brl(left())} do orçamento.</p></div></div>
+<div class="grid">${ENG.map(e=>`<button class="opt ${S.eng===e.id?'sel':''}" ${e.c>left()?'disabled':''} onclick="pick('eng','${e.id}')"><div class="optBody"><div class="optHead">${ic(e.i)}<span class="cost">${brl(e.c)}</span></div><b>${e.n}</b><span>${e.d}</span><div class="cardMeta"><span class="tag">${e.t}</span></div></div></button>`).join('')}</div>
+${ENG.some(e=>e.c>left())?'<p class="note">Alguns motores ficaram desativados porque custam mais do que o orçamento restante.</p>':''}
+<div class="row"><button class="btn ghost" onclick="go(2)">Voltar</button><button class="btn primary" ${S.eng?'':'disabled'} onclick="go(4)">Ver resultado</button></div>`,
+
+()=>{ const c=calc(), t=VT[c.v], s=STARTUPS[S.st], pct=Math.min(100,Math.round(c.final/GOAL*100)), w=why(c); return `
+<div class="sectionHead"><div><h2>Resultado da simulação</h2><p class="mut">${s.name}${S.group?' · '+esc(S.group):''}</p></div></div>
+<div class="stats">
+  <div class="stat"><small>Clientes finais</small><strong>${c.final}</strong><div class="sub">base após churn</div></div>
+  <div class="stat"><small>Crescimento</small><strong>${c.growth}%</strong><div class="sub">sobre a base inicial</div></div>
+  <div class="stat"><small>Retenção / churn</small><strong>${c.ret}% / ${c.churn}%</strong><div class="sub">saúde da base</div></div>
+  <div class="stat"><small>CAC</small><strong>${brl(c.cac)}</strong><div class="sub">custo por cliente</div></div>
+  <div class="stat"><small>LTV</small><strong>${brl(c.ltv)}</strong><div class="sub">valor ao longo do tempo</div></div>
+  <div class="stat"><small>Motor principal</small><strong>${c.e.n}</strong><div class="sub">estratégia central</div></div>
+</div>
+<div class="reportGrid">
+  <div class="panel">
+    <h3>Growth report</h3>
+    <pre class="pre">Clientes iniciais:    ${START}
+Clientes adquiridos:  +${c.gained}
+Clientes perdidos:    -${c.lost}
+Clientes finais:      ${c.final}   (meta: ${GOAL} ${c.final>=GOAL?'✓ atingida':'✗ não atingida'})
+Investimento total:   ${brl(c.spent)}
+Receita mensal:       ${brl(c.final*c.e.arpu)}</pre>
+    <div class="track" role="img" aria-label="Progresso até a meta"><div class="fill" id="fl"></div></div>
+    <p class="mut">${pct}% da meta de ${GOAL} clientes</p>
+  </div>
+  <div>
+    <div class="verdict ${c.v}"><div class="vi">${ic({ok:'trophy',warn:'alert',bad:'down'}[c.v],1)}</div><div><h3>${t[0]}</h3><p>${t[1]}</p><p class="mut">LTV/CAC = ${c.ratio.toFixed(1)}. Em geral, o cenário fica mais confortável quando o LTV é pelo menos 3× o CAC e o churn permanece até cerca de 20%.</p></div></div>
+  </div>
+</div>
+<div class="whyGrid">
+  <section class="whyCard good">
+    <span class="kicker">O que ajudou</span>
+    <h4>Prováveis motivos de ter dado certo</h4>
+    <ul>${w.good.map(x=>`<li>${x}</li>`).join('')}</ul>
+  </section>
+  <section class="whyCard bad">
+    <span class="kicker">Pontos de atenção</span>
+    <h4>Prováveis motivos de ter dado errado ou limitado o resultado</h4>
+    <ul>${w.bad.map(x=>`<li>${x}</li>`).join('')}</ul>
+  </section>
+</div>
+${analysis(c)}
+<div class="row"><button class="btn primary" onclick="save()">Salvar no placar</button><button class="btn ghost" onclick="reset()">Nova rodada</button></div>
+<div class="sectionHead" style="margin-top:26px"><div><h2>Placar dos grupos</h2><p class="mut">Mais clientes nem sempre significam melhor estratégia: compare também churn, CAC e LTV.</p></div></div>
+<div class="wrap" id="board"></div>`},
+];
+
+function board(){try{return JSON.parse(localStorage.getItem('sgs-board')||'[]')}catch(e){return mem}}
+let mem=[];
+function save(){
+ const c=calc(), row={g:S.group||'Sem nome',s:STARTUPS[S.st].name,f:c.final,ch:c.churn,cac:c.cac,ltv:c.ltv,v:c.v};
+ const b=board(); b.push(row); mem=b; try{localStorage.setItem('sgs-board',JSON.stringify(b))}catch(e){} drawBoard();
+}
+function drawBoard(){
+ const el=$('board'); if(!el) return; const b=board().slice().sort((a,b)=>b.f-a.f);
+ el.innerHTML=b.length?`<table><tr><th>Grupo</th><th>Startup</th><th>Clientes</th><th>Churn</th><th>CAC</th><th>LTV</th><th>Resultado</th></tr>${b.map(r=>`<tr><td>${esc(r.g)}</td><td>${esc(r.s)}</td><td>${r.f}</td><td>${r.ch}%</td><td>${brl(r.cac)}</td><td>${brl(r.ltv)}</td><td>${{ok:'Sustentável ✓',warn:'Atenção',bad:'Insustentável ✗'}[r.v]}</td></tr>`).join('')}</table><div class="row" style="padding:14px"><button class="btn ghost" onclick="clearBoard()">Limpar placar</button></div>`:'<div style="padding:18px"><p class="mut">Nenhum grupo salvo ainda.</p></div>';
+}
+function clearBoard(){mem=[];try{localStorage.removeItem('sgs-board')}catch(e){}drawBoard()}
+function reset(){S={st:S.st,group:'',ch:[],ret:null,eng:null};go(0)}
+function render(){ bar(); $('app').innerHTML=V[step](); if(step===4){drawBoard(); const c=calc(); setTimeout(()=>{const f=$('fl'); if(f) f.style.width=Math.min(100,c.final/GOAL*100)+'%'},80)} }
+render();
+</script>
+</body>
+</html>
